@@ -1,0 +1,1935 @@
+From 7171ab8f9bfc680bf465deabe5f1c68f781f2d76 Mon Sep 17 00:00:00 2001
+From: Fancy Qian <fqian@plume.com>
+Date: Mon, 8 Jan 2024 12:06:56 +0800
+Subject: [PATCH 1/2] ESW-17224: sepolicy: create opensync te rules
+
+the rules are same as system app, the file type of opensync still is
+system_app_data_file.
+
+Signed-off-by: Fancy Qian <fqian@plume.com>
+---
+ prebuilts/api/28.0/private/incidentd.te    |   1 +
+ prebuilts/api/28.0/private/logd.te         |   1 +
+ prebuilts/api/28.0/private/opensync_app.te | 126 ++++++++++++++
+ prebuilts/api/28.0/private/seapp_contexts  |   3 +
+ prebuilts/api/28.0/private/statsd.te       |   1 +
+ prebuilts/api/28.0/public/app.te           |   1 +
+ prebuilts/api/28.0/public/opensync_app.te  |   1 +
+ prebuilts/api/29.0/private/domain.te       |   2 +-
+ prebuilts/api/29.0/private/incidentd.te    |   1 +
+ prebuilts/api/29.0/private/logd.te         |   1 +
+ prebuilts/api/29.0/private/opensync_app.te | 149 ++++++++++++++++
+ prebuilts/api/29.0/private/seapp_contexts  |   3 +
+ prebuilts/api/29.0/private/stats.te        |   1 +
+ prebuilts/api/29.0/public/app.te           |   1 +
+ prebuilts/api/29.0/public/opensync_app.te  |   1 +
+ prebuilts/api/30.0/private/domain.te       |   2 +-
+ prebuilts/api/30.0/private/logd.te         |   1 +
+ prebuilts/api/30.0/private/opensync_app.te | 163 +++++++++++++++++
+ prebuilts/api/30.0/private/seapp_contexts  |   3 +
+ prebuilts/api/30.0/private/stats.te        |   1 +
+ prebuilts/api/30.0/public/app.te           |   1 +
+ prebuilts/api/30.0/public/opensync_app.te  |   1 +
+ prebuilts/api/31.0/private/domain.te       |   2 +-
+ prebuilts/api/31.0/private/logd.te         |   1 +
+ prebuilts/api/31.0/private/opensync_app.te | 187 ++++++++++++++++++++
+ prebuilts/api/31.0/private/property.te     |   2 +
+ prebuilts/api/31.0/private/seapp_contexts  |   3 +
+ prebuilts/api/31.0/private/stats.te        |   1 +
+ prebuilts/api/31.0/public/app.te           |   1 +
+ prebuilts/api/31.0/public/opensync_app.te  |   1 +
+ prebuilts/api/31.0/public/te_macros        |   1 +
+ prebuilts/api/32.0/private/domain.te       |   2 +-
+ prebuilts/api/32.0/private/logd.te         |   1 +
+ prebuilts/api/32.0/private/opensync_app.te | 187 ++++++++++++++++++++
+ prebuilts/api/32.0/private/property.te     |   2 +
+ prebuilts/api/32.0/private/seapp_contexts  |   3 +
+ prebuilts/api/32.0/private/stats.te        |   1 +
+ prebuilts/api/32.0/public/app.te           |   1 +
+ prebuilts/api/32.0/public/opensync_app.te  |   1 +
+ prebuilts/api/32.0/public/te_macros        |   1 +
+ prebuilts/api/33.0/private/domain.te       |   1 +
+ prebuilts/api/33.0/private/logd.te         |   1 +
+ prebuilts/api/33.0/private/opensync_app.te | 193 +++++++++++++++++++++
+ prebuilts/api/33.0/private/property.te     |   2 +
+ prebuilts/api/33.0/private/seapp_contexts  |   4 +-
+ prebuilts/api/33.0/private/stats.te        |   1 +
+ prebuilts/api/33.0/private/system_app.te   |   2 +-
+ prebuilts/api/33.0/public/app.te           |   1 +
+ prebuilts/api/33.0/public/opensync_app.te  |   1 +
+ prebuilts/api/33.0/public/te_macros        |   1 +
+ private/domain.te                          |   1 +
+ private/logd.te                            |   1 +
+ private/opensync_app.te                    | 193 +++++++++++++++++++++
+ private/property.te                        |   2 +
+ private/seapp_contexts                     |   4 +-
+ private/stats.te                           |   1 +
+ private/system_app.te                      |   2 +-
+ public/app.te                              |   1 +
+ public/opensync_app.te                     |   1 +
+ public/te_macros                           |   1 +
+ 60 files changed, 1269 insertions(+), 8 deletions(-)
+ create mode 100644 prebuilts/api/28.0/private/opensync_app.te
+ create mode 100644 prebuilts/api/28.0/public/opensync_app.te
+ create mode 100644 prebuilts/api/29.0/private/opensync_app.te
+ create mode 100644 prebuilts/api/29.0/public/opensync_app.te
+ create mode 100644 prebuilts/api/30.0/private/opensync_app.te
+ create mode 100644 prebuilts/api/30.0/public/opensync_app.te
+ create mode 100644 prebuilts/api/31.0/private/opensync_app.te
+ create mode 100644 prebuilts/api/31.0/public/opensync_app.te
+ create mode 100644 prebuilts/api/32.0/private/opensync_app.te
+ create mode 100644 prebuilts/api/32.0/public/opensync_app.te
+ create mode 100644 prebuilts/api/33.0/private/opensync_app.te
+ create mode 100644 prebuilts/api/33.0/public/opensync_app.te
+ create mode 100644 private/opensync_app.te
+ create mode 100644 public/opensync_app.te
+
+diff --git a/prebuilts/api/28.0/private/incidentd.te b/prebuilts/api/28.0/private/incidentd.te
+index 35b184c89..a2742537a 100644
+--- a/prebuilts/api/28.0/private/incidentd.te
++++ b/prebuilts/api/28.0/private/incidentd.te
+@@ -144,6 +144,7 @@ neverallow {
+   -statsd
+   -system_app
+   -system_server
++  -opensync_app
+ } incident_service:service_manager find;
+ 
+ # only incidentd and the other root services in limited circumstances
+diff --git a/prebuilts/api/28.0/private/logd.te b/prebuilts/api/28.0/private/logd.te
+index 4338e4005..f2ac6152a 100644
+--- a/prebuilts/api/28.0/private/logd.te
++++ b/prebuilts/api/28.0/private/logd.te
+@@ -36,4 +36,5 @@ neverallow {
+   -shell
+   userdebug_or_eng(`-su')
+   -system_app
++  -opensync_app
+ } runtime_event_log_tags_file:file no_rw_file_perms;
+diff --git a/prebuilts/api/28.0/private/opensync_app.te b/prebuilts/api/28.0/private/opensync_app.te
+new file mode 100644
+index 000000000..64a66654b
+--- /dev/null
++++ b/prebuilts/api/28.0/private/opensync_app.te
+@@ -0,0 +1,126 @@
++###
++### A domain for OpenSync app.
++###
++typeattribute opensync_app coredomain;
++
++app_domain(opensync_app)
++net_domain(opensync_app)
++binder_service(opensync_app)
++
++# android.ui and system.ui
++allow opensync_app rootfs:dir getattr;
++
++# Read and write /data/data subdirectory.
++allow opensync_app system_app_data_file:dir create_dir_perms;
++allow opensync_app system_app_data_file:{ file lnk_file } create_file_perms;
++
++# Read and write to /data/misc/user.
++allow opensync_app misc_user_data_file:dir create_dir_perms;
++allow opensync_app misc_user_data_file:file create_file_perms;
++
++# Access to vold-mounted storage for measuring free space
++allow opensync_app mnt_media_rw_file:dir search;
++
++# Read wallpaper file.
++allow opensync_app wallpaper_file:file r_file_perms;
++
++# Read icon file.
++allow opensync_app icon_file:file r_file_perms;
++
++# Write to properties
++set_prop(opensync_app, bluetooth_a2dp_offload_prop)
++set_prop(opensync_app, bluetooth_prop)
++set_prop(opensync_app, debug_prop)
++set_prop(opensync_app, system_prop)
++set_prop(opensync_app, exported_bluetooth_prop)
++set_prop(opensync_app, exported_system_prop)
++set_prop(opensync_app, exported2_system_prop)
++set_prop(opensync_app, exported3_system_prop)
++set_prop(opensync_app, logd_prop)
++set_prop(opensync_app, net_radio_prop)
++set_prop(opensync_app, system_radio_prop)
++set_prop(opensync_app, exported_system_radio_prop)
++set_prop(opensync_app, log_tag_prop)
++userdebug_or_eng(`set_prop(opensync_app, logpersistd_logging_prop)')
++auditallow opensync_app net_radio_prop:property_service set;
++auditallow opensync_app system_radio_prop:property_service set;
++auditallow opensync_app exported_system_radio_prop:property_service set;
++
++# ctl interface
++set_prop(opensync_app, ctl_default_prop)
++set_prop(opensync_app, ctl_bugreport_prop)
++
++# Create /data/anr/traces.txt.
++allow opensync_app anr_data_file:dir ra_dir_perms;
++allow opensync_app anr_data_file:file create_file_perms;
++
++# Settings need to access app name and icon from asec
++allow opensync_app asec_apk_file:file r_file_perms;
++
++# Allow system apps (like Settings) to interact with statsd
++binder_call(opensync_app, statsd)
++
++# Allow system apps to interact with incidentd
++binder_call(opensync_app, incidentd)
++
++allow opensync_app servicemanager:service_manager list;
++# TODO: scope this down? Too broad?
++allow opensync_app {
++  service_manager_type
++  -dumpstate_service
++  -installd_service
++  -netd_service
++  -virtual_touchpad_service
++  -vold_service
++  -vr_hwc_service
++}:service_manager find;
++# suppress denials for services opensync_app should not be accessing.
++dontaudit opensync_app {
++  dumpstate_service
++  installd_service
++  netd_service
++  virtual_touchpad_service
++  vold_service
++  vr_hwc_service
++}:service_manager find;
++
++allow opensync_app keystore:keystore_key {
++    get_state
++    get
++    insert
++    delete
++    exist
++    list
++    reset
++    password
++    lock
++    unlock
++    is_empty
++    sign
++    verify
++    grant
++    duplicate
++    clear_uid
++    user_changed
++};
++
++# settings app reads /proc/version
++allow opensync_app {
++  proc_version
++}:file r_file_perms;
++
++control_logd(opensync_app)
++read_runtime_log_tags(opensync_app)
++get_prop(opensync_app, device_logging_prop)
++
++# allow system apps to use UDP sockets provided by the system server but not
++# modify them other than to connect
++allow opensync_app system_server:udp_socket {
++        connect getattr read recvfrom sendto write getopt setopt };
++
++###
++### Neverallow rules
++###
++
++# app domains which access /dev/fuse should not run as opensync_app
++neverallow opensync_app fuse_device:chr_file *;
+diff --git a/prebuilts/api/28.0/private/seapp_contexts b/prebuilts/api/28.0/private/seapp_contexts
+index c21d49f2a..d9249bc56 100644
+--- a/prebuilts/api/28.0/private/seapp_contexts
++++ b/prebuilts/api/28.0/private/seapp_contexts
+@@ -116,3 +116,6 @@ user=_app isPrivApp=true domain=priv_app type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 domain=untrusted_app type=app_data_file levelFrom=all
+ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file levelFrom=user
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app.* domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app:* domain=opensync_app type=system_app_data_file levelFrom=user
+diff --git a/prebuilts/api/28.0/private/statsd.te b/prebuilts/api/28.0/private/statsd.te
+index 74b89c242..cd2b3f7bd 100644
+--- a/prebuilts/api/28.0/private/statsd.te
++++ b/prebuilts/api/28.0/private/statsd.te
+@@ -105,6 +105,7 @@ neverallow {
+   -system_app
+   -system_server
+   -traceur_app
++  -opensync_app
+ } stats_service:service_manager find;
+ 
+ # Only statsd and the other root services in limited circumstances.
+diff --git a/prebuilts/api/28.0/public/app.te b/prebuilts/api/28.0/public/app.te
+index 55308da51..09a16716c 100644
+--- a/prebuilts/api/28.0/public/app.te
++++ b/prebuilts/api/28.0/public/app.te
+@@ -557,6 +557,7 @@ neverallow {
+   appdomain
+   -bluetooth
+   -system_app
++  -opensync_app
+ } { bluetooth_a2dp_offload_prop bluetooth_prop exported_bluetooth_prop }:file create_file_perms;
+ 
+ # Apps cannot access proc_uid_time_in_state
+diff --git a/prebuilts/api/28.0/public/opensync_app.te b/prebuilts/api/28.0/public/opensync_app.te
+new file mode 100644
+index 000000000..e6442dd1d
+--- /dev/null
++++ b/prebuilts/api/28.0/public/opensync_app.te
+@@ -0,0 +1 @@
++type opensync_app, domain;
+diff --git a/prebuilts/api/29.0/private/domain.te b/prebuilts/api/29.0/private/domain.te
+index 447176ed0..3883c6e21 100644
+--- a/prebuilts/api/29.0/private/domain.te
++++ b/prebuilts/api/29.0/private/domain.te
+@@ -169,7 +169,7 @@ neverallow {
+ # do not change between system_server staging the files and apexd processing
+ # the files.
+ neverallow { domain -init -system_server -apexd -installd} staging_data_file:dir *;
+-neverallow { domain -init -system_app -system_server -apexd -kernel -installd } staging_data_file:file *;
++neverallow { domain -init -system_app -opensync_app -system_server -apexd -kernel -installd } staging_data_file:file *;
+ neverallow { domain -init -system_server -installd} staging_data_file:dir no_w_dir_perms;
+ # apexd needs the link and unlink permissions, so list every `no_w_file_perms`
+ # except for `link` and `unlink`.
+diff --git a/prebuilts/api/29.0/private/incidentd.te b/prebuilts/api/29.0/private/incidentd.te
+index ee9812e30..6fe3c85af 100644
+--- a/prebuilts/api/29.0/private/incidentd.te
++++ b/prebuilts/api/29.0/private/incidentd.te
+@@ -157,6 +157,7 @@ neverallow {
+   -statsd
+   -system_app
+   -system_server
++  -opensync_app
+ } incident_service:service_manager find;
+ 
+ # only incidentd and the other root services in limited circumstances
+diff --git a/prebuilts/api/29.0/private/logd.te b/prebuilts/api/29.0/private/logd.te
+index ca92e2061..9f7325455 100644
+--- a/prebuilts/api/29.0/private/logd.te
++++ b/prebuilts/api/29.0/private/logd.te
+@@ -35,4 +35,5 @@ neverallow {
+   -shell
+   userdebug_or_eng(`-su')
+   -system_app
++  -opensync_app
+ } runtime_event_log_tags_file:file no_rw_file_perms;
+diff --git a/prebuilts/api/29.0/private/opensync_app.te b/prebuilts/api/29.0/private/opensync_app.te
+new file mode 100644
+index 000000000..51b5d5ac3
+--- /dev/null
++++ b/prebuilts/api/29.0/private/opensync_app.te
+@@ -0,0 +1,149 @@
++###
++### A domain for OpenSync app.
++###
++
++typeattribute opensync_app coredomain;
++
++app_domain(opensync_app)
++net_domain(opensync_app)
++binder_service(opensync_app)
++
++# android.ui and system.ui
++allow opensync_app rootfs:dir getattr;
++
++# Read and write /data/data subdirectory.
++allow opensync_app system_app_data_file:dir create_dir_perms;
++allow opensync_app system_app_data_file:{ file lnk_file } create_file_perms;
++
++# Read and write to /data/misc/user.
++allow opensync_app misc_user_data_file:dir create_dir_perms;
++allow opensync_app misc_user_data_file:file create_file_perms;
++
++# Access to vold-mounted storage for measuring free space
++allow opensync_app mnt_media_rw_file:dir search;
++
++# Access to apex files stored on /data (b/136063500)
++# Needed so that Settings can access NOTICE files inside apex
++# files located in the assets/ directory.
++allow opensync_app apex_data_file:dir search;
++allow opensync_app staging_data_file:file r_file_perms;
++
++# Read wallpaper file.
++allow opensync_app wallpaper_file:file r_file_perms;
++
++# Read icon file.
++allow opensync_app icon_file:file r_file_perms;
++
++# Write to properties
++set_prop(opensync_app, bluetooth_a2dp_offload_prop)
++set_prop(opensync_app, bluetooth_audio_hal_prop)
++set_prop(opensync_app, bluetooth_prop)
++set_prop(opensync_app, debug_prop)
++set_prop(opensync_app, system_prop)
++set_prop(opensync_app, exported_bluetooth_prop)
++set_prop(opensync_app, exported_system_prop)
++set_prop(opensync_app, exported2_system_prop)
++set_prop(opensync_app, exported3_system_prop)
++set_prop(opensync_app, logd_prop)
++set_prop(opensync_app, net_radio_prop)
++set_prop(opensync_app, system_radio_prop)
++set_prop(opensync_app, exported_system_radio_prop)
++set_prop(opensync_app, log_tag_prop)
++userdebug_or_eng(`set_prop(opensync_app, logpersistd_logging_prop)')
++auditallow opensync_app net_radio_prop:property_service set;
++auditallow opensync_app system_radio_prop:property_service set;
++auditallow opensync_app exported_system_radio_prop:property_service set;
++# Allow Settings to enable Dynamic System Update
++set_prop(opensync_app, dynamic_system_prop)
++
++# ctl interface
++set_prop(opensync_app, ctl_default_prop)
++set_prop(opensync_app, ctl_bugreport_prop)
++
++# Create /data/anr/traces.txt.
++allow opensync_app anr_data_file:dir ra_dir_perms;
++allow opensync_app anr_data_file:file create_file_perms;
++
++# Settings need to access app name and icon from asec
++allow opensync_app asec_apk_file:file r_file_perms;
++
++# Allow system apps (like Settings) to interact with statsd
++binder_call(opensync_app, statsd)
++
++# Allow system apps to interact with incidentd
++binder_call(opensync_app, incidentd)
++
++# Allow system apps to interact with gpuservice
++binder_call(opensync_app, gpuservice)
++
++allow opensync_app servicemanager:service_manager list;
++# TODO: scope this down? Too broad?
++allow opensync_app {
++  service_manager_type
++  -apex_service
++  -dnsresolver_service
++  -dumpstate_service
++  -installd_service
++  -iorapd_service
++  -lpdump_service
++  -netd_service
++  -system_suspend_control_service
++  -virtual_touchpad_service
++  -vold_service
++  -vr_hwc_service
++}:service_manager find;
++# suppress denials for services opensync_app should not be accessing.
++dontaudit opensync_app {
++  dnsresolver_service
++  dumpstate_service
++  installd_service
++  iorapd_service
++  netd_service
++  virtual_touchpad_service
++  vold_service
++  vr_hwc_service
++}:service_manager find;
++
++allow opensync_app keystore:keystore_key {
++    get_state
++    get
++    insert
++    delete
++    exist
++    list
++    reset
++    password
++    lock
++    unlock
++    is_empty
++    sign
++    verify
++    grant
++    duplicate
++    clear_uid
++    user_changed
++};
++
++# settings app reads /proc/version
++allow opensync_app {
++  proc_version
++}:file r_file_perms;
++
++# Settings app writes to /dev/stune/foreground/tasks.
++allow opensync_app cgroup:file w_file_perms;
++
++control_logd(opensync_app)
++read_runtime_log_tags(opensync_app)
++get_prop(opensync_app, device_logging_prop)
++
++# allow system apps to use UDP sockets provided by the system server but not
++# modify them other than to connect
++allow opensync_app system_server:udp_socket {
++        connect getattr read recvfrom sendto write getopt setopt };
++
++###
++### Neverallow rules
++###
++
++# app domains which access /dev/fuse should not run as opensync_app
++neverallow opensync_app fuse_device:chr_file *;
+diff --git a/prebuilts/api/29.0/private/seapp_contexts b/prebuilts/api/29.0/private/seapp_contexts
+index ad8a76cd9..50633071e 100644
+--- a/prebuilts/api/29.0/private/seapp_contexts
++++ b/prebuilts/api/29.0/private/seapp_contexts
+@@ -162,3 +162,6 @@ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file leve
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 fromRunAs=true domain=runas_app levelFrom=all
+ user=_app fromRunAs=true domain=runas_app levelFrom=user
++user=system seinfo=platform name=com.opensync.app domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app.* domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app:* domain=opensync_app type=system_app_data_file levelFrom=user
+diff --git a/prebuilts/api/29.0/private/stats.te b/prebuilts/api/29.0/private/stats.te
+index 81ec1cf77..e7644061b 100644
+--- a/prebuilts/api/29.0/private/stats.te
++++ b/prebuilts/api/29.0/private/stats.te
+@@ -49,4 +49,5 @@ neverallow {
+   -system_app
+   -system_server
+   -traceur_app
++  -opensync_app
+ } stats_service:service_manager find;
+diff --git a/prebuilts/api/29.0/public/app.te b/prebuilts/api/29.0/public/app.te
+index 5b3459f34..d7e2f3eca 100644
+--- a/prebuilts/api/29.0/public/app.te
++++ b/prebuilts/api/29.0/public/app.te
+@@ -564,6 +564,7 @@ neverallow {
+   appdomain
+   -bluetooth
+   -system_app
++  -opensync_app
+ } { bluetooth_audio_hal_prop bluetooth_a2dp_offload_prop bluetooth_prop exported_bluetooth_prop }:file create_file_perms;
+ 
+ # Apps cannot access proc_uid_time_in_state
+diff --git a/prebuilts/api/29.0/public/opensync_app.te b/prebuilts/api/29.0/public/opensync_app.te
+new file mode 100644
+index 000000000..e6442dd1d
+--- /dev/null
++++ b/prebuilts/api/29.0/public/opensync_app.te
+@@ -0,0 +1 @@
++type opensync_app, domain;
+diff --git a/prebuilts/api/30.0/private/domain.te b/prebuilts/api/30.0/private/domain.te
+index 430cb3f09..a704326a1 100644
+--- a/prebuilts/api/30.0/private/domain.te
++++ b/prebuilts/api/30.0/private/domain.te
+@@ -209,7 +209,7 @@ neverallow {
+ # do not change between system_server staging the files and apexd processing
+ # the files.
+ neverallow { domain -init -system_server -apexd -installd -iorap_inode2filename } staging_data_file:dir *;
+-neverallow { domain -init -system_app -system_server -apexd -kernel -installd -iorap_inode2filename -priv_app } staging_data_file:file *;
++neverallow { domain -init -system_app -opensync_app -system_server -apexd -kernel -installd -iorap_inode2filename -priv_app } staging_data_file:file *;
+ neverallow { domain -init -system_server -installd} staging_data_file:dir no_w_dir_perms;
+ # apexd needs the link and unlink permissions, so list every `no_w_file_perms`
+ # except for `link` and `unlink`.
+diff --git a/prebuilts/api/30.0/private/logd.te b/prebuilts/api/30.0/private/logd.te
+index ca92e2061..9f7325455 100644
+--- a/prebuilts/api/30.0/private/logd.te
++++ b/prebuilts/api/30.0/private/logd.te
+@@ -35,4 +35,5 @@ neverallow {
+   -shell
+   userdebug_or_eng(`-su')
+   -system_app
++  -opensync_app
+ } runtime_event_log_tags_file:file no_rw_file_perms;
+diff --git a/prebuilts/api/30.0/private/opensync_app.te b/prebuilts/api/30.0/private/opensync_app.te
+new file mode 100644
+index 000000000..0f450a130
+--- /dev/null
++++ b/prebuilts/api/30.0/private/opensync_app.te
+@@ -0,0 +1,163 @@
++###
++### A domain for OpenSync app.
++###
++
++typeattribute opensync_app coredomain;
++
++app_domain(opensync_app)
++net_domain(opensync_app)
++binder_service(opensync_app)
++
++# android.ui and system.ui
++allow opensync_app rootfs:dir getattr;
++
++# Read and write /data/data subdirectory.
++allow opensync_app system_app_data_file:dir create_dir_perms;
++allow opensync_app system_app_data_file:{ file lnk_file } create_file_perms;
++
++# Read and write to /data/misc/user.
++allow opensync_app misc_user_data_file:dir create_dir_perms;
++allow opensync_app misc_user_data_file:file create_file_perms;
++
++# Access to vold-mounted storage for measuring free space
++allow opensync_app mnt_media_rw_file:dir search;
++
++# Access to apex files stored on /data (b/136063500)
++# Needed so that Settings can access NOTICE files inside apex
++# files located in the assets/ directory.
++allow opensync_app apex_data_file:dir search;
++allow opensync_app staging_data_file:file r_file_perms;
++
++# Read wallpaper file.
++allow opensync_app wallpaper_file:file r_file_perms;
++
++# Read icon file.
++allow opensync_app icon_file:file r_file_perms;
++
++# Write to properties
++set_prop(opensync_app, bluetooth_a2dp_offload_prop)
++set_prop(opensync_app, bluetooth_audio_hal_prop)
++set_prop(opensync_app, bluetooth_prop)
++set_prop(opensync_app, debug_prop)
++set_prop(opensync_app, system_prop)
++set_prop(opensync_app, exported_bluetooth_prop)
++set_prop(opensync_app, exported_system_prop)
++set_prop(opensync_app, exported2_system_prop)
++set_prop(opensync_app, exported3_system_prop)
++set_prop(opensync_app, logd_prop)
++set_prop(opensync_app, net_radio_prop)
++set_prop(opensync_app, system_radio_prop)
++set_prop(opensync_app, exported_system_radio_prop)
++set_prop(opensync_app, log_tag_prop)
++userdebug_or_eng(`set_prop(opensync_app, logpersistd_logging_prop)')
++auditallow opensync_app net_radio_prop:property_service set;
++auditallow opensync_app system_radio_prop:property_service set;
++auditallow opensync_app exported_system_radio_prop:property_service set;
++# Allow Settings to enable Dynamic System Update
++set_prop(opensync_app, dynamic_system_prop)
++
++# ctl interface
++set_prop(opensync_app, ctl_default_prop)
++set_prop(opensync_app, ctl_bugreport_prop)
++
++# Allow developer settings to query gsid status
++get_prop(opensync_app, gsid_prop)
++
++# Create /data/anr/traces.txt.
++allow opensync_app anr_data_file:dir ra_dir_perms;
++allow opensync_app anr_data_file:file create_file_perms;
++
++# Settings need to access app name and icon from asec
++allow opensync_app asec_apk_file:file r_file_perms;
++
++# Allow system apps (like Settings) to interact with statsd
++binder_call(opensync_app, statsd)
++
++# Allow system apps to interact with incidentd
++binder_call(opensync_app, incidentd)
++
++# Allow system apps to interact with gpuservice
++binder_call(opensync_app, gpuservice)
++
++# Allow system app to interact with Dumpstate HAL
++hal_client_domain(opensync_app, hal_dumpstate)
++
++allow opensync_app servicemanager:service_manager list;
++# TODO: scope this down? Too broad?
++allow opensync_app {
++  service_manager_type
++  -apex_service
++  -dnsresolver_service
++  -dumpstate_service
++  -installd_service
++  -iorapd_service
++  -lpdump_service
++  -netd_service
++  -system_suspend_control_service
++  -virtual_touchpad_service
++  -vold_service
++  -vr_hwc_service
++  -default_android_service
++}:service_manager find;
++# suppress denials for services opensync_app should not be accessing.
++dontaudit opensync_app {
++  dnsresolver_service
++  dumpstate_service
++  installd_service
++  iorapd_service
++  netd_service
++  virtual_touchpad_service
++  vold_service
++  vr_hwc_service
++}:service_manager find;
++
++allow opensync_app keystore:keystore_key {
++    get_state
++    get
++    insert
++    delete
++    exist
++    list
++    reset
++    password
++    lock
++    unlock
++    is_empty
++    sign
++    verify
++    grant
++    duplicate
++    clear_uid
++    user_changed
++};
++
++# settings app reads /proc/version
++allow opensync_app {
++  proc_version
++}:file r_file_perms;
++
++# Settings app writes to /dev/stune/foreground/tasks.
++allow opensync_app cgroup:file w_file_perms;
++
++control_logd(opensync_app)
++read_runtime_log_tags(opensync_app)
++get_prop(opensync_app, device_logging_prop)
++
++# allow system apps to use UDP sockets provided by the system server but not
++# modify them other than to connect
++allow opensync_app system_server:udp_socket {
++        connect getattr read recvfrom sendto write getopt setopt };
++
++###
++### Neverallow rules
++###
++
++# app domains which access /dev/fuse should not run as opensync_app
++neverallow opensync_app fuse_device:chr_file *;
++
++# Apps which run as UID=system should not rely on any attacker controlled
++# filesystem locations, such as /data/local/tmp. For /data/local/tmp, we
++# allow writes to files passed by file descriptor to support dumpstate and
++# bug reports, but not reads.
++neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
++neverallow opensync_app shell_data_file:file { open read ioctl lock };
+diff --git a/prebuilts/api/30.0/private/seapp_contexts b/prebuilts/api/30.0/private/seapp_contexts
+index a8c61be8f..151cb9dab 100644
+--- a/prebuilts/api/30.0/private/seapp_contexts
++++ b/prebuilts/api/30.0/private/seapp_contexts
+@@ -173,3 +173,6 @@ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file leve
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 fromRunAs=true domain=runas_app levelFrom=all
+ user=_app fromRunAs=true domain=runas_app levelFrom=user
++user=system seinfo=platform name=com.opensync.app domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app.* domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app:* domain=opensync_app type=system_app_data_file levelFrom=user
+diff --git a/prebuilts/api/30.0/private/stats.te b/prebuilts/api/30.0/private/stats.te
+index 3e8a3d5fb..a631ce44b 100644
+--- a/prebuilts/api/30.0/private/stats.te
++++ b/prebuilts/api/30.0/private/stats.te
+@@ -52,4 +52,5 @@ neverallow {
+   -system_app
+   -system_server
+   -traceur_app
++  -opensync_app
+ } stats_service:service_manager find;
+diff --git a/prebuilts/api/30.0/public/app.te b/prebuilts/api/30.0/public/app.te
+index c892d9e47..cce07b3f4 100644
+--- a/prebuilts/api/30.0/public/app.te
++++ b/prebuilts/api/30.0/public/app.te
+@@ -564,6 +564,7 @@ neverallow {
+   appdomain
+   -bluetooth
+   -system_app
++  -opensync_app
+ } { bluetooth_audio_hal_prop bluetooth_a2dp_offload_prop bluetooth_prop exported_bluetooth_prop }:file create_file_perms;
+ 
+ # Apps cannot access proc_uid_time_in_state
+diff --git a/prebuilts/api/30.0/public/opensync_app.te b/prebuilts/api/30.0/public/opensync_app.te
+new file mode 100644
+index 000000000..e6442dd1d
+--- /dev/null
++++ b/prebuilts/api/30.0/public/opensync_app.te
+@@ -0,0 +1 @@
++type opensync_app, domain;
+diff --git a/prebuilts/api/31.0/private/domain.te b/prebuilts/api/31.0/private/domain.te
+index b91d36d85..a153cfecc 100644
+--- a/prebuilts/api/31.0/private/domain.te
++++ b/prebuilts/api/31.0/private/domain.te
+@@ -204,7 +204,7 @@ neverallow {
+ # do not change between system_server staging the files and apexd processing
+ # the files.
+ neverallow { domain -init -system_server -apexd -installd -iorap_inode2filename -priv_app } staging_data_file:dir *;
+-neverallow { domain -init -system_app -system_server -apexd -adbd -kernel -installd -iorap_inode2filename -priv_app } staging_data_file:file *;
++neverallow { domain -init -system_app -opensync_app -system_server -apexd -adbd -kernel -installd -iorap_inode2filename -priv_app } staging_data_file:file *;
+ neverallow { domain -init -system_server -installd} staging_data_file:dir no_w_dir_perms;
+ # apexd needs the link and unlink permissions, so list every `no_w_file_perms`
+ # except for `link` and `unlink`.
+diff --git a/prebuilts/api/31.0/private/logd.te b/prebuilts/api/31.0/private/logd.te
+index 7112c4f83..32af52477 100644
+--- a/prebuilts/api/31.0/private/logd.te
++++ b/prebuilts/api/31.0/private/logd.te
+@@ -38,4 +38,5 @@ neverallow {
+   -shell
+   userdebug_or_eng(`-su')
+   -system_app
++  -opensync_app
+ } runtime_event_log_tags_file:file no_rw_file_perms;
+diff --git a/prebuilts/api/31.0/private/opensync_app.te b/prebuilts/api/31.0/private/opensync_app.te
+new file mode 100644
+index 000000000..372fa34d8
+--- /dev/null
++++ b/prebuilts/api/31.0/private/opensync_app.te
+@@ -0,0 +1,187 @@
++###
++### A domain for OpenSync app.
++###
++
++typeattribute opensync_app coredomain, mlstrustedsubject;
++
++app_domain(opensync_app)
++net_domain(opensync_app)
++binder_service(opensync_app)
++
++# android.ui and system.ui
++allow opensync_app rootfs:dir getattr;
++
++# Read and write /data/data subdirectory.
++allow opensync_app system_app_data_file:dir create_dir_perms;
++allow opensync_app system_app_data_file:{ file lnk_file } create_file_perms;
++
++# Read and write to /data/misc/user.
++allow opensync_app misc_user_data_file:dir create_dir_perms;
++allow opensync_app misc_user_data_file:file create_file_perms;
++
++# Access to apex files stored on /data (b/136063500)
++# Needed so that Settings can access NOTICE files inside apex
++# files located in the assets/ directory.
++allow opensync_app apex_data_file:dir search;
++allow opensync_app staging_data_file:file r_file_perms;
++
++# Read wallpaper file.
++allow opensync_app wallpaper_file:file r_file_perms;
++
++# Read icon file.
++allow opensync_app icon_file:file r_file_perms;
++
++# Write to properties
++set_prop(opensync_app, arm64_memtag_prop)
++set_prop(opensync_app, bluetooth_a2dp_offload_prop)
++set_prop(opensync_app, bluetooth_audio_hal_prop)
++set_prop(opensync_app, bluetooth_prop)
++set_prop(opensync_app, debug_prop)
++set_prop(opensync_app, system_prop)
++set_prop(opensync_app, exported_bluetooth_prop)
++set_prop(opensync_app, exported_system_prop)
++set_prop(opensync_app, exported3_system_prop)
++set_prop(opensync_app, logd_prop)
++set_prop(opensync_app, net_radio_prop)
++set_prop(opensync_app, usb_control_prop)
++set_prop(opensync_app, usb_prop)
++set_prop(opensync_app, log_tag_prop)
++userdebug_or_eng(`set_prop(opensync_app, logpersistd_logging_prop)')
++auditallow opensync_app net_radio_prop:property_service set;
++auditallow opensync_app usb_control_prop:property_service set;
++auditallow opensync_app usb_prop:property_service set;
++# Allow Settings to enable Dynamic System Update
++set_prop(opensync_app, dynamic_system_prop)
++
++# ctl interface
++set_prop(opensync_app, ctl_default_prop)
++set_prop(opensync_app, ctl_bugreport_prop)
++
++# Allow developer settings to query gsid status
++get_prop(opensync_app, gsid_prop)
++
++# Create /data/anr/traces.txt.
++allow opensync_app anr_data_file:dir ra_dir_perms;
++allow opensync_app anr_data_file:file create_file_perms;
++
++# Settings need to access app name and icon from asec
++allow opensync_app asec_apk_file:file r_file_perms;
++
++# Allow system apps (like Settings) to interact with statsd
++binder_call(opensync_app, statsd)
++
++# Allow system apps to interact with incidentd
++binder_call(opensync_app, incidentd)
++
++# Allow system app to interact with Dumpstate HAL
++hal_client_domain(opensync_app, hal_dumpstate)
++
++allow opensync_app servicemanager:service_manager list;
++# TODO: scope this down? Too broad?
++allow opensync_app {
++  service_manager_type
++  -apex_service
++  -dnsresolver_service
++  -dumpstate_service
++  -installd_service
++  -iorapd_service
++  -lpdump_service
++  -netd_service
++  -system_suspend_control_internal_service
++  -system_suspend_control_service
++  -tracingproxy_service
++  -virtual_touchpad_service
++  -vold_service
++  -vr_hwc_service
++  -default_android_service
++}:service_manager find;
++# suppress denials for services opensync_app should not be accessing.
++dontaudit opensync_app {
++  dnsresolver_service
++  dumpstate_service
++  installd_service
++  iorapd_service
++  netd_service
++  virtual_touchpad_service
++  vold_service
++  vr_hwc_service
++}:service_manager find;
++
++# suppress denials caused by debugfs_tracing
++dontaudit opensync_app debugfs_tracing:file rw_file_perms;
++
++allow opensync_app keystore:keystore_key {
++    get_state
++    get
++    insert
++    delete
++    exist
++    list
++    reset
++    password
++    lock
++    unlock
++    is_empty
++    sign
++    verify
++    grant
++    duplicate
++    clear_uid
++    user_changed
++};
++
++allow opensync_app keystore:keystore2_key {
++    delete
++    get_info
++    grant
++    rebind
++    update
++    use
++};
++
++# Allow Settings to manage WI-FI keys.
++allow opensync_app wifi_key:keystore2_key {
++    delete
++    get_info
++    rebind
++    update
++    use
++};
++
++# settings app reads /proc/version
++allow opensync_app {
++  proc_version
++}:file r_file_perms;
++
++# Settings app writes to /dev/stune/foreground/tasks.
++allow opensync_app cgroup:file w_file_perms;
++allow opensync_app cgroup_v2:file w_file_perms;
++
++control_logd(opensync_app)
++read_runtime_log_tags(opensync_app)
++get_prop(opensync_app, device_logging_prop)
++
++# allow system apps to use UDP sockets provided by the system server but not
++# modify them other than to connect
++allow opensync_app system_server:udp_socket {
++        connect getattr read recvfrom sendto write getopt setopt };
++
++# Settings app reads ro.oem_unlock_supported
++get_prop(opensync_app, oem_unlock_prop)
++
++# Allow system apps to act as Perfetto producers.
++perfetto_producer(opensync_app)
++
++###
++### Neverallow rules
++###
++
++# app domains which access /dev/fuse should not run as opensync_app
++neverallow opensync_app fuse_device:chr_file *;
++
++# Apps which run as UID=system should not rely on any attacker controlled
++# filesystem locations, such as /data/local/tmp. For /data/local/tmp, we
++# allow writes to files passed by file descriptor to support dumpstate and
++# bug reports, but not reads.
++neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
++neverallow opensync_app shell_data_file:file { open read ioctl lock };
+diff --git a/prebuilts/api/31.0/private/property.te b/prebuilts/api/31.0/private/property.te
+index e72693a38..dd025c21a 100644
+--- a/prebuilts/api/31.0/private/property.te
++++ b/prebuilts/api/31.0/private/property.te
+@@ -401,6 +401,7 @@ neverallow {
+   -init
+   -shell
+   -system_app
++  -opensync_app
+ } {
+   arm64_memtag_prop
+ }:property_service set;
+@@ -505,6 +506,7 @@ neverallow {
+   -vendor_init
+   -dumpstate
+   -system_app
++  -opensync_app
+ } oem_unlock_prop:file no_rw_file_perms;
+ 
+ neverallow {
+diff --git a/prebuilts/api/31.0/private/seapp_contexts b/prebuilts/api/31.0/private/seapp_contexts
+index 1d38fd926..d7ebc1957 100644
+--- a/prebuilts/api/31.0/private/seapp_contexts
++++ b/prebuilts/api/31.0/private/seapp_contexts
+@@ -175,3 +175,6 @@ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file leve
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 fromRunAs=true domain=runas_app levelFrom=all
+ user=_app fromRunAs=true domain=runas_app levelFrom=user
++user=system seinfo=platform name=com.opensync.app domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app.* domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app:* domain=opensync_app type=system_app_data_file levelFrom=user
+diff --git a/prebuilts/api/31.0/private/stats.te b/prebuilts/api/31.0/private/stats.te
+index db29072df..91a12a70e 100644
+--- a/prebuilts/api/31.0/private/stats.te
++++ b/prebuilts/api/31.0/private/stats.te
+@@ -54,4 +54,5 @@ neverallow {
+   -system_app
+   -system_server
+   -traceur_app
++  -opensync_app
+ } stats_service:service_manager find;
+diff --git a/prebuilts/api/31.0/public/app.te b/prebuilts/api/31.0/public/app.te
+index 5527f9994..3caf59cb6 100644
+--- a/prebuilts/api/31.0/public/app.te
++++ b/prebuilts/api/31.0/public/app.te
+@@ -567,6 +567,7 @@ neverallow {
+   appdomain
+   -bluetooth
+   -system_app
++  -opensync_app
+ } { bluetooth_audio_hal_prop bluetooth_a2dp_offload_prop bluetooth_prop exported_bluetooth_prop }:file create_file_perms;
+ 
+ # Apps cannot access proc_uid_time_in_state
+diff --git a/prebuilts/api/31.0/public/opensync_app.te b/prebuilts/api/31.0/public/opensync_app.te
+new file mode 100644
+index 000000000..e6442dd1d
+--- /dev/null
++++ b/prebuilts/api/31.0/public/opensync_app.te
+@@ -0,0 +1 @@
++type opensync_app, domain;
+diff --git a/prebuilts/api/31.0/public/te_macros b/prebuilts/api/31.0/public/te_macros
+index 7dc5062c5..7e64f3746 100644
+--- a/prebuilts/api/31.0/public/te_macros
++++ b/prebuilts/api/31.0/public/te_macros
+@@ -727,6 +727,7 @@ define(`hal_attribute_service', `
+         -shell
+         -system_app
+         -traceur_app
++        -opensync_app
+     } $2:service_manager find;
+   ')
+ ')
+diff --git a/prebuilts/api/32.0/private/domain.te b/prebuilts/api/32.0/private/domain.te
+index b91d36d85..a153cfecc 100644
+--- a/prebuilts/api/32.0/private/domain.te
++++ b/prebuilts/api/32.0/private/domain.te
+@@ -204,7 +204,7 @@ neverallow {
+ # do not change between system_server staging the files and apexd processing
+ # the files.
+ neverallow { domain -init -system_server -apexd -installd -iorap_inode2filename -priv_app } staging_data_file:dir *;
+-neverallow { domain -init -system_app -system_server -apexd -adbd -kernel -installd -iorap_inode2filename -priv_app } staging_data_file:file *;
++neverallow { domain -init -system_app -opensync_app -system_server -apexd -adbd -kernel -installd -iorap_inode2filename -priv_app } staging_data_file:file *;
+ neverallow { domain -init -system_server -installd} staging_data_file:dir no_w_dir_perms;
+ # apexd needs the link and unlink permissions, so list every `no_w_file_perms`
+ # except for `link` and `unlink`.
+diff --git a/prebuilts/api/32.0/private/logd.te b/prebuilts/api/32.0/private/logd.te
+index 7112c4f83..32af52477 100644
+--- a/prebuilts/api/32.0/private/logd.te
++++ b/prebuilts/api/32.0/private/logd.te
+@@ -38,4 +38,5 @@ neverallow {
+   -shell
+   userdebug_or_eng(`-su')
+   -system_app
++  -opensync_app
+ } runtime_event_log_tags_file:file no_rw_file_perms;
+diff --git a/prebuilts/api/32.0/private/opensync_app.te b/prebuilts/api/32.0/private/opensync_app.te
+new file mode 100644
+index 000000000..372fa34d8
+--- /dev/null
++++ b/prebuilts/api/32.0/private/opensync_app.te
+@@ -0,0 +1,187 @@
++###
++### A domain for OpenSync app.
++###
++
++typeattribute opensync_app coredomain, mlstrustedsubject;
++
++app_domain(opensync_app)
++net_domain(opensync_app)
++binder_service(opensync_app)
++
++# android.ui and system.ui
++allow opensync_app rootfs:dir getattr;
++
++# Read and write /data/data subdirectory.
++allow opensync_app system_app_data_file:dir create_dir_perms;
++allow opensync_app system_app_data_file:{ file lnk_file } create_file_perms;
++
++# Read and write to /data/misc/user.
++allow opensync_app misc_user_data_file:dir create_dir_perms;
++allow opensync_app misc_user_data_file:file create_file_perms;
++
++# Access to apex files stored on /data (b/136063500)
++# Needed so that Settings can access NOTICE files inside apex
++# files located in the assets/ directory.
++allow opensync_app apex_data_file:dir search;
++allow opensync_app staging_data_file:file r_file_perms;
++
++# Read wallpaper file.
++allow opensync_app wallpaper_file:file r_file_perms;
++
++# Read icon file.
++allow opensync_app icon_file:file r_file_perms;
++
++# Write to properties
++set_prop(opensync_app, arm64_memtag_prop)
++set_prop(opensync_app, bluetooth_a2dp_offload_prop)
++set_prop(opensync_app, bluetooth_audio_hal_prop)
++set_prop(opensync_app, bluetooth_prop)
++set_prop(opensync_app, debug_prop)
++set_prop(opensync_app, system_prop)
++set_prop(opensync_app, exported_bluetooth_prop)
++set_prop(opensync_app, exported_system_prop)
++set_prop(opensync_app, exported3_system_prop)
++set_prop(opensync_app, logd_prop)
++set_prop(opensync_app, net_radio_prop)
++set_prop(opensync_app, usb_control_prop)
++set_prop(opensync_app, usb_prop)
++set_prop(opensync_app, log_tag_prop)
++userdebug_or_eng(`set_prop(opensync_app, logpersistd_logging_prop)')
++auditallow opensync_app net_radio_prop:property_service set;
++auditallow opensync_app usb_control_prop:property_service set;
++auditallow opensync_app usb_prop:property_service set;
++# Allow Settings to enable Dynamic System Update
++set_prop(opensync_app, dynamic_system_prop)
++
++# ctl interface
++set_prop(opensync_app, ctl_default_prop)
++set_prop(opensync_app, ctl_bugreport_prop)
++
++# Allow developer settings to query gsid status
++get_prop(opensync_app, gsid_prop)
++
++# Create /data/anr/traces.txt.
++allow opensync_app anr_data_file:dir ra_dir_perms;
++allow opensync_app anr_data_file:file create_file_perms;
++
++# Settings need to access app name and icon from asec
++allow opensync_app asec_apk_file:file r_file_perms;
++
++# Allow system apps (like Settings) to interact with statsd
++binder_call(opensync_app, statsd)
++
++# Allow system apps to interact with incidentd
++binder_call(opensync_app, incidentd)
++
++# Allow system app to interact with Dumpstate HAL
++hal_client_domain(opensync_app, hal_dumpstate)
++
++allow opensync_app servicemanager:service_manager list;
++# TODO: scope this down? Too broad?
++allow opensync_app {
++  service_manager_type
++  -apex_service
++  -dnsresolver_service
++  -dumpstate_service
++  -installd_service
++  -iorapd_service
++  -lpdump_service
++  -netd_service
++  -system_suspend_control_internal_service
++  -system_suspend_control_service
++  -tracingproxy_service
++  -virtual_touchpad_service
++  -vold_service
++  -vr_hwc_service
++  -default_android_service
++}:service_manager find;
++# suppress denials for services opensync_app should not be accessing.
++dontaudit opensync_app {
++  dnsresolver_service
++  dumpstate_service
++  installd_service
++  iorapd_service
++  netd_service
++  virtual_touchpad_service
++  vold_service
++  vr_hwc_service
++}:service_manager find;
++
++# suppress denials caused by debugfs_tracing
++dontaudit opensync_app debugfs_tracing:file rw_file_perms;
++
++allow opensync_app keystore:keystore_key {
++    get_state
++    get
++    insert
++    delete
++    exist
++    list
++    reset
++    password
++    lock
++    unlock
++    is_empty
++    sign
++    verify
++    grant
++    duplicate
++    clear_uid
++    user_changed
++};
++
++allow opensync_app keystore:keystore2_key {
++    delete
++    get_info
++    grant
++    rebind
++    update
++    use
++};
++
++# Allow Settings to manage WI-FI keys.
++allow opensync_app wifi_key:keystore2_key {
++    delete
++    get_info
++    rebind
++    update
++    use
++};
++
++# settings app reads /proc/version
++allow opensync_app {
++  proc_version
++}:file r_file_perms;
++
++# Settings app writes to /dev/stune/foreground/tasks.
++allow opensync_app cgroup:file w_file_perms;
++allow opensync_app cgroup_v2:file w_file_perms;
++
++control_logd(opensync_app)
++read_runtime_log_tags(opensync_app)
++get_prop(opensync_app, device_logging_prop)
++
++# allow system apps to use UDP sockets provided by the system server but not
++# modify them other than to connect
++allow opensync_app system_server:udp_socket {
++        connect getattr read recvfrom sendto write getopt setopt };
++
++# Settings app reads ro.oem_unlock_supported
++get_prop(opensync_app, oem_unlock_prop)
++
++# Allow system apps to act as Perfetto producers.
++perfetto_producer(opensync_app)
++
++###
++### Neverallow rules
++###
++
++# app domains which access /dev/fuse should not run as opensync_app
++neverallow opensync_app fuse_device:chr_file *;
++
++# Apps which run as UID=system should not rely on any attacker controlled
++# filesystem locations, such as /data/local/tmp. For /data/local/tmp, we
++# allow writes to files passed by file descriptor to support dumpstate and
++# bug reports, but not reads.
++neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
++neverallow opensync_app shell_data_file:file { open read ioctl lock };
+diff --git a/prebuilts/api/32.0/private/property.te b/prebuilts/api/32.0/private/property.te
+index 77e1a7d26..e0201b3cd 100644
+--- a/prebuilts/api/32.0/private/property.te
++++ b/prebuilts/api/32.0/private/property.te
+@@ -402,6 +402,7 @@ neverallow {
+   -init
+   -shell
+   -system_app
++  -opensync_app
+ } {
+   arm64_memtag_prop
+ }:property_service set;
+@@ -506,6 +507,7 @@ neverallow {
+   -vendor_init
+   -dumpstate
+   -system_app
++  -opensync_app
+ } oem_unlock_prop:file no_rw_file_perms;
+ 
+ neverallow {
+diff --git a/prebuilts/api/32.0/private/seapp_contexts b/prebuilts/api/32.0/private/seapp_contexts
+index 1d38fd926..d7ebc1957 100644
+--- a/prebuilts/api/32.0/private/seapp_contexts
++++ b/prebuilts/api/32.0/private/seapp_contexts
+@@ -175,3 +175,6 @@ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file leve
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 fromRunAs=true domain=runas_app levelFrom=all
+ user=_app fromRunAs=true domain=runas_app levelFrom=user
++user=system seinfo=platform name=com.opensync.app domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app.* domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app:* domain=opensync_app type=system_app_data_file levelFrom=user
+diff --git a/prebuilts/api/32.0/private/stats.te b/prebuilts/api/32.0/private/stats.te
+index db29072df..91a12a70e 100644
+--- a/prebuilts/api/32.0/private/stats.te
++++ b/prebuilts/api/32.0/private/stats.te
+@@ -54,4 +54,5 @@ neverallow {
+   -system_app
+   -system_server
+   -traceur_app
++  -opensync_app
+ } stats_service:service_manager find;
+diff --git a/prebuilts/api/32.0/public/app.te b/prebuilts/api/32.0/public/app.te
+index 5527f9994..3caf59cb6 100644
+--- a/prebuilts/api/32.0/public/app.te
++++ b/prebuilts/api/32.0/public/app.te
+@@ -567,6 +567,7 @@ neverallow {
+   appdomain
+   -bluetooth
+   -system_app
++  -opensync_app
+ } { bluetooth_audio_hal_prop bluetooth_a2dp_offload_prop bluetooth_prop exported_bluetooth_prop }:file create_file_perms;
+ 
+ # Apps cannot access proc_uid_time_in_state
+diff --git a/prebuilts/api/32.0/public/opensync_app.te b/prebuilts/api/32.0/public/opensync_app.te
+new file mode 100644
+index 000000000..e6442dd1d
+--- /dev/null
++++ b/prebuilts/api/32.0/public/opensync_app.te
+@@ -0,0 +1 @@
++type opensync_app, domain;
+diff --git a/prebuilts/api/32.0/public/te_macros b/prebuilts/api/32.0/public/te_macros
+index 7dc5062c5..7e64f3746 100644
+--- a/prebuilts/api/32.0/public/te_macros
++++ b/prebuilts/api/32.0/public/te_macros
+@@ -727,6 +727,7 @@ define(`hal_attribute_service', `
+         -shell
+         -system_app
+         -traceur_app
++        -opensync_app
+     } $2:service_manager find;
+   ')
+ ')
+diff --git a/prebuilts/api/33.0/private/domain.te b/prebuilts/api/33.0/private/domain.te
+index bcb9d52e3..dcd8658a7 100644
+--- a/prebuilts/api/33.0/private/domain.te
++++ b/prebuilts/api/33.0/private/domain.te
+@@ -251,6 +251,7 @@ neverallow {
+   -shell
+   -virtualizationservice
+   -crosvm
++  -opensync_app
+ } staging_data_file:file *;
+ neverallow { domain -init -system_server -installd} staging_data_file:dir no_w_dir_perms;
+ # apexd needs the link and unlink permissions, so list every `no_w_file_perms`
+diff --git a/prebuilts/api/33.0/private/logd.te b/prebuilts/api/33.0/private/logd.te
+index 62d41969f..966a47d90 100644
+--- a/prebuilts/api/33.0/private/logd.te
++++ b/prebuilts/api/33.0/private/logd.te
+@@ -40,6 +40,7 @@ neverallow {
+   -shell
+   userdebug_or_eng(`-su')
+   -system_app
++  -opensync_app
+ } runtime_event_log_tags_file:file no_rw_file_perms;
+ 
+ # Only binder communication between logd and system_server is allowed
+diff --git a/prebuilts/api/33.0/private/opensync_app.te b/prebuilts/api/33.0/private/opensync_app.te
+new file mode 100644
+index 000000000..eb16d7952
+--- /dev/null
++++ b/prebuilts/api/33.0/private/opensync_app.te
+@@ -0,0 +1,193 @@
++###
++### A domain for OpenSync app.
++###
++typeattribute opensync_app coredomain, mlstrustedsubject;
++
++app_domain(opensync_app)
++net_domain(opensync_app)
++binder_service(opensync_app)
++
++# android.ui and system.ui
++allow opensync_app rootfs:dir getattr;
++
++# Read and write /data/data subdirectory.
++allow opensync_app system_app_data_file:dir create_dir_perms;
++allow opensync_app system_app_data_file:{ file lnk_file } create_file_perms;
++
++# Read and write to /data/misc/user.
++allow opensync_app misc_user_data_file:dir create_dir_perms;
++allow opensync_app misc_user_data_file:file create_file_perms;
++
++# Access to apex files stored on /data (b/136063500)
++# Needed so that Settings can access NOTICE files inside apex
++# files located in the assets/ directory.
++allow opensync_app apex_data_file:dir search;
++allow opensync_app staging_data_file:file r_file_perms;
++
++# Read wallpaper file.
++allow opensync_app wallpaper_file:file r_file_perms;
++
++# Read icon file.
++allow opensync_app icon_file:file r_file_perms;
++
++# Write to properties
++set_prop(opensync_app, adaptive_haptics_prop)
++set_prop(opensync_app, arm64_memtag_prop)
++set_prop(opensync_app, bluetooth_a2dp_offload_prop)
++set_prop(opensync_app, bluetooth_audio_hal_prop)
++set_prop(opensync_app, bluetooth_prop)
++set_prop(opensync_app, debug_prop)
++set_prop(opensync_app, system_prop)
++set_prop(opensync_app, exported_bluetooth_prop)
++set_prop(opensync_app, exported_system_prop)
++set_prop(opensync_app, exported3_system_prop)
++set_prop(opensync_app, gesture_prop)
++set_prop(opensync_app, logd_prop)
++set_prop(opensync_app, net_radio_prop)
++set_prop(opensync_app, usb_control_prop)
++set_prop(opensync_app, usb_prop)
++set_prop(opensync_app, log_tag_prop)
++userdebug_or_eng(`set_prop(opensync_app, logpersistd_logging_prop)')
++auditallow opensync_app net_radio_prop:property_service set;
++auditallow opensync_app usb_control_prop:property_service set;
++auditallow opensync_app usb_prop:property_service set;
++# Allow Settings to enable Dynamic System Update
++set_prop(opensync_app, dynamic_system_prop)
++
++# ctl interface
++set_prop(opensync_app, ctl_default_prop)
++set_prop(opensync_app, ctl_bugreport_prop)
++
++# Allow developer settings to query gsid status
++get_prop(opensync_app, gsid_prop)
++
++# Create /data/anr/traces.txt.
++allow opensync_app anr_data_file:dir ra_dir_perms;
++allow opensync_app anr_data_file:file create_file_perms;
++
++# Settings need to access app name and icon from asec
++allow opensync_app asec_apk_file:file r_file_perms;
++
++# Allow system apps (like Settings) to interact with statsd
++binder_call(opensync_app, statsd)
++
++# Allow system apps to interact with incidentd
++binder_call(opensync_app, incidentd)
++
++# Allow system app to interact with Dumpstate HAL
++hal_client_domain(opensync_app, hal_dumpstate)
++
++allow opensync_app servicemanager:service_manager list;
++# TODO: scope this down? Too broad?
++allow opensync_app {
++  service_manager_type
++  -apex_service
++  -dnsresolver_service
++  -dumpstate_service
++  -installd_service
++  -iorapd_service
++  -lpdump_service
++  -mdns_service
++  -netd_service
++  -system_suspend_control_internal_service
++  -system_suspend_control_service
++  -tracingproxy_service
++  -virtual_touchpad_service
++  -vold_service
++  -default_android_service
++}:service_manager find;
++# suppress denials for services opensync_app should not be accessing.
++dontaudit opensync_app {
++  dnsresolver_service
++  dumpstate_service
++  installd_service
++  iorapd_service
++  mdns_service
++  netd_service
++  virtual_touchpad_service
++  vold_service
++}:service_manager find;
++
++# suppress denials caused by debugfs_tracing
++dontaudit opensync_app debugfs_tracing:file rw_file_perms;
++
++allow opensync_app keystore:keystore_key {
++    get_state
++    get
++    insert
++    delete
++    exist
++    list
++    reset
++    password
++    lock
++    unlock
++    is_empty
++    sign
++    verify
++    grant
++    duplicate
++    clear_uid
++    user_changed
++};
++
++allow opensync_app keystore:keystore2_key {
++    delete
++    get_info
++    grant
++    rebind
++    update
++    use
++};
++
++# Allow Settings to manage WI-FI keys.
++allow opensync_app wifi_key:keystore2_key {
++    delete
++    get_info
++    rebind
++    update
++    use
++};
++
++# settings app reads /proc/version
++allow opensync_app {
++  proc_version
++}:file r_file_perms;
++
++# Settings app writes to /dev/stune/foreground/tasks.
++allow opensync_app cgroup:file w_file_perms;
++allow opensync_app cgroup_v2:file w_file_perms;
++allow opensync_app cgroup_v2:dir w_dir_perms;
++
++control_logd(opensync_app)
++read_runtime_log_tags(opensync_app)
++get_prop(opensync_app, device_logging_prop)
++
++# allow system apps to use UDP sockets provided by the system server but not
++# modify them other than to connect
++allow opensync_app system_server:udp_socket {
++        connect getattr read recvfrom sendto write getopt setopt };
++
++# Settings app reads ro.oem_unlock_supported
++get_prop(opensync_app, oem_unlock_prop)
++
++# Allow system apps to act as Perfetto producers.
++perfetto_producer(opensync_app)
++
++# Allow performance profiling by the platform itself.
++can_profile_heap(opensync_app)
++can_profile_perf(opensync_app)
++
++###
++### Neverallow rules
++###
++
++# app domains which access /dev/fuse should not run as opensync_app
++neverallow opensync_app fuse_device:chr_file *;
++
++# Apps which run as UID=system should not rely on any attacker controlled
++# filesystem locations, such as /data/local/tmp. For /data/local/tmp, we
++# allow writes to files passed by file descriptor to support dumpstate and
++# bug reports, but not reads.
++neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
++neverallow opensync_app shell_data_file:file { open read ioctl lock };
+diff --git a/prebuilts/api/33.0/private/property.te b/prebuilts/api/33.0/private/property.te
+index 41a4c2ff3..b6e662494 100644
+--- a/prebuilts/api/33.0/private/property.te
++++ b/prebuilts/api/33.0/private/property.te
+@@ -422,6 +422,7 @@ neverallow {
+   -init
+   -shell
+   -system_app
++  -opensync_app
+ } {
+   arm64_memtag_prop
+   gwp_asan_prop
+@@ -527,6 +528,7 @@ neverallow {
+   -vendor_init
+   -dumpstate
+   -system_app
++  -opensync_app
+ } oem_unlock_prop:file no_rw_file_perms;
+ 
+ neverallow {
+diff --git a/prebuilts/api/33.0/private/seapp_contexts b/prebuilts/api/33.0/private/seapp_contexts
+index b26d97789..8967c863e 100644
+--- a/prebuilts/api/33.0/private/seapp_contexts
++++ b/prebuilts/api/33.0/private/seapp_contexts
+@@ -176,4 +176,6 @@ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file leve
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 fromRunAs=true domain=runas_app levelFrom=all
+ user=_app fromRunAs=true domain=runas_app levelFrom=user
+-
++user=system seinfo=platform name=com.opensync.app domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app.* domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app:* domain=opensync_app type=system_app_data_file levelFrom=user
+diff --git a/prebuilts/api/33.0/private/stats.te b/prebuilts/api/33.0/private/stats.te
+index db29072df..91a12a70e 100644
+--- a/prebuilts/api/33.0/private/stats.te
++++ b/prebuilts/api/33.0/private/stats.te
+@@ -54,4 +54,5 @@ neverallow {
+   -system_app
+   -system_server
+   -traceur_app
++  -opensync_app
+ } stats_service:service_manager find;
+diff --git a/prebuilts/api/33.0/private/system_app.te b/prebuilts/api/33.0/private/system_app.te
+index d82cff793..0eaed6953 100644
+--- a/prebuilts/api/33.0/private/system_app.te
++++ b/prebuilts/api/33.0/private/system_app.te
+@@ -196,4 +196,4 @@ neverallow system_app shell_data_file:dir { no_w_dir_perms open search read };
+ neverallow system_app shell_data_file:file { open read ioctl lock };
+ 
+ # system_app should be the only domain writing the adaptive haptics prop
+-neverallow { domain -init -system_app } adaptive_haptics_prop:property_service set;
++neverallow { domain -init -system_app -opensync_app } adaptive_haptics_prop:property_service set;
+diff --git a/prebuilts/api/33.0/public/app.te b/prebuilts/api/33.0/public/app.te
+index de3d0cabe..d05d3e6a6 100644
+--- a/prebuilts/api/33.0/public/app.te
++++ b/prebuilts/api/33.0/public/app.te
+@@ -199,6 +199,7 @@ neverallow {
+   appdomain
+   -bluetooth
+   -system_app
++  -opensync_app
+ } { bluetooth_audio_hal_prop bluetooth_a2dp_offload_prop bluetooth_prop exported_bluetooth_prop }:file create_file_perms;
+ 
+ # allow system_app to access Nfc-related system properties.
+diff --git a/prebuilts/api/33.0/public/opensync_app.te b/prebuilts/api/33.0/public/opensync_app.te
+new file mode 100644
+index 000000000..e6442dd1d
+--- /dev/null
++++ b/prebuilts/api/33.0/public/opensync_app.te
+@@ -0,0 +1 @@
++type opensync_app, domain;
+diff --git a/prebuilts/api/33.0/public/te_macros b/prebuilts/api/33.0/public/te_macros
+index 58d04b45d..1e1cc2e71 100644
+--- a/prebuilts/api/33.0/public/te_macros
++++ b/prebuilts/api/33.0/public/te_macros
+@@ -762,6 +762,7 @@ define(`hal_attribute_service', `
+         -shell
+         -system_app
+         -traceur_app
++        -opensync_app
+     } $2:service_manager find;
+   ')
+ ')
+diff --git a/private/domain.te b/private/domain.te
+index bcb9d52e3..dcd8658a7 100644
+--- a/private/domain.te
++++ b/private/domain.te
+@@ -251,6 +251,7 @@ neverallow {
+   -shell
+   -virtualizationservice
+   -crosvm
++  -opensync_app
+ } staging_data_file:file *;
+ neverallow { domain -init -system_server -installd} staging_data_file:dir no_w_dir_perms;
+ # apexd needs the link and unlink permissions, so list every `no_w_file_perms`
+diff --git a/private/logd.te b/private/logd.te
+index 62d41969f..966a47d90 100644
+--- a/private/logd.te
++++ b/private/logd.te
+@@ -40,6 +40,7 @@ neverallow {
+   -shell
+   userdebug_or_eng(`-su')
+   -system_app
++  -opensync_app
+ } runtime_event_log_tags_file:file no_rw_file_perms;
+ 
+ # Only binder communication between logd and system_server is allowed
+diff --git a/private/opensync_app.te b/private/opensync_app.te
+new file mode 100644
+index 000000000..eb16d7952
+--- /dev/null
++++ b/private/opensync_app.te
+@@ -0,0 +1,193 @@
++###
++### A domain for OpenSync app.
++###
++typeattribute opensync_app coredomain, mlstrustedsubject;
++
++app_domain(opensync_app)
++net_domain(opensync_app)
++binder_service(opensync_app)
++
++# android.ui and system.ui
++allow opensync_app rootfs:dir getattr;
++
++# Read and write /data/data subdirectory.
++allow opensync_app system_app_data_file:dir create_dir_perms;
++allow opensync_app system_app_data_file:{ file lnk_file } create_file_perms;
++
++# Read and write to /data/misc/user.
++allow opensync_app misc_user_data_file:dir create_dir_perms;
++allow opensync_app misc_user_data_file:file create_file_perms;
++
++# Access to apex files stored on /data (b/136063500)
++# Needed so that Settings can access NOTICE files inside apex
++# files located in the assets/ directory.
++allow opensync_app apex_data_file:dir search;
++allow opensync_app staging_data_file:file r_file_perms;
++
++# Read wallpaper file.
++allow opensync_app wallpaper_file:file r_file_perms;
++
++# Read icon file.
++allow opensync_app icon_file:file r_file_perms;
++
++# Write to properties
++set_prop(opensync_app, adaptive_haptics_prop)
++set_prop(opensync_app, arm64_memtag_prop)
++set_prop(opensync_app, bluetooth_a2dp_offload_prop)
++set_prop(opensync_app, bluetooth_audio_hal_prop)
++set_prop(opensync_app, bluetooth_prop)
++set_prop(opensync_app, debug_prop)
++set_prop(opensync_app, system_prop)
++set_prop(opensync_app, exported_bluetooth_prop)
++set_prop(opensync_app, exported_system_prop)
++set_prop(opensync_app, exported3_system_prop)
++set_prop(opensync_app, gesture_prop)
++set_prop(opensync_app, logd_prop)
++set_prop(opensync_app, net_radio_prop)
++set_prop(opensync_app, usb_control_prop)
++set_prop(opensync_app, usb_prop)
++set_prop(opensync_app, log_tag_prop)
++userdebug_or_eng(`set_prop(opensync_app, logpersistd_logging_prop)')
++auditallow opensync_app net_radio_prop:property_service set;
++auditallow opensync_app usb_control_prop:property_service set;
++auditallow opensync_app usb_prop:property_service set;
++# Allow Settings to enable Dynamic System Update
++set_prop(opensync_app, dynamic_system_prop)
++
++# ctl interface
++set_prop(opensync_app, ctl_default_prop)
++set_prop(opensync_app, ctl_bugreport_prop)
++
++# Allow developer settings to query gsid status
++get_prop(opensync_app, gsid_prop)
++
++# Create /data/anr/traces.txt.
++allow opensync_app anr_data_file:dir ra_dir_perms;
++allow opensync_app anr_data_file:file create_file_perms;
++
++# Settings need to access app name and icon from asec
++allow opensync_app asec_apk_file:file r_file_perms;
++
++# Allow system apps (like Settings) to interact with statsd
++binder_call(opensync_app, statsd)
++
++# Allow system apps to interact with incidentd
++binder_call(opensync_app, incidentd)
++
++# Allow system app to interact with Dumpstate HAL
++hal_client_domain(opensync_app, hal_dumpstate)
++
++allow opensync_app servicemanager:service_manager list;
++# TODO: scope this down? Too broad?
++allow opensync_app {
++  service_manager_type
++  -apex_service
++  -dnsresolver_service
++  -dumpstate_service
++  -installd_service
++  -iorapd_service
++  -lpdump_service
++  -mdns_service
++  -netd_service
++  -system_suspend_control_internal_service
++  -system_suspend_control_service
++  -tracingproxy_service
++  -virtual_touchpad_service
++  -vold_service
++  -default_android_service
++}:service_manager find;
++# suppress denials for services opensync_app should not be accessing.
++dontaudit opensync_app {
++  dnsresolver_service
++  dumpstate_service
++  installd_service
++  iorapd_service
++  mdns_service
++  netd_service
++  virtual_touchpad_service
++  vold_service
++}:service_manager find;
++
++# suppress denials caused by debugfs_tracing
++dontaudit opensync_app debugfs_tracing:file rw_file_perms;
++
++allow opensync_app keystore:keystore_key {
++    get_state
++    get
++    insert
++    delete
++    exist
++    list
++    reset
++    password
++    lock
++    unlock
++    is_empty
++    sign
++    verify
++    grant
++    duplicate
++    clear_uid
++    user_changed
++};
++
++allow opensync_app keystore:keystore2_key {
++    delete
++    get_info
++    grant
++    rebind
++    update
++    use
++};
++
++# Allow Settings to manage WI-FI keys.
++allow opensync_app wifi_key:keystore2_key {
++    delete
++    get_info
++    rebind
++    update
++    use
++};
++
++# settings app reads /proc/version
++allow opensync_app {
++  proc_version
++}:file r_file_perms;
++
++# Settings app writes to /dev/stune/foreground/tasks.
++allow opensync_app cgroup:file w_file_perms;
++allow opensync_app cgroup_v2:file w_file_perms;
++allow opensync_app cgroup_v2:dir w_dir_perms;
++
++control_logd(opensync_app)
++read_runtime_log_tags(opensync_app)
++get_prop(opensync_app, device_logging_prop)
++
++# allow system apps to use UDP sockets provided by the system server but not
++# modify them other than to connect
++allow opensync_app system_server:udp_socket {
++        connect getattr read recvfrom sendto write getopt setopt };
++
++# Settings app reads ro.oem_unlock_supported
++get_prop(opensync_app, oem_unlock_prop)
++
++# Allow system apps to act as Perfetto producers.
++perfetto_producer(opensync_app)
++
++# Allow performance profiling by the platform itself.
++can_profile_heap(opensync_app)
++can_profile_perf(opensync_app)
++
++###
++### Neverallow rules
++###
++
++# app domains which access /dev/fuse should not run as opensync_app
++neverallow opensync_app fuse_device:chr_file *;
++
++# Apps which run as UID=system should not rely on any attacker controlled
++# filesystem locations, such as /data/local/tmp. For /data/local/tmp, we
++# allow writes to files passed by file descriptor to support dumpstate and
++# bug reports, but not reads.
++neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
++neverallow opensync_app shell_data_file:file { open read ioctl lock };
+diff --git a/private/property.te b/private/property.te
+index 41a4c2ff3..b6e662494 100644
+--- a/private/property.te
++++ b/private/property.te
+@@ -422,6 +422,7 @@ neverallow {
+   -init
+   -shell
+   -system_app
++  -opensync_app
+ } {
+   arm64_memtag_prop
+   gwp_asan_prop
+@@ -527,6 +528,7 @@ neverallow {
+   -vendor_init
+   -dumpstate
+   -system_app
++  -opensync_app
+ } oem_unlock_prop:file no_rw_file_perms;
+ 
+ neverallow {
+diff --git a/private/seapp_contexts b/private/seapp_contexts
+index b26d97789..8967c863e 100644
+--- a/private/seapp_contexts
++++ b/private/seapp_contexts
+@@ -176,4 +176,6 @@ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file leve
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 fromRunAs=true domain=runas_app levelFrom=all
+ user=_app fromRunAs=true domain=runas_app levelFrom=user
+-
++user=system seinfo=platform name=com.opensync.app domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app.* domain=opensync_app type=system_app_data_file levelFrom=user
++user=system seinfo=platform name=com.opensync.app:* domain=opensync_app type=system_app_data_file levelFrom=user
+diff --git a/private/stats.te b/private/stats.te
+index db29072df..91a12a70e 100644
+--- a/private/stats.te
++++ b/private/stats.te
+@@ -54,4 +54,5 @@ neverallow {
+   -system_app
+   -system_server
+   -traceur_app
++  -opensync_app
+ } stats_service:service_manager find;
+diff --git a/private/system_app.te b/private/system_app.te
+index d82cff793..0eaed6953 100644
+--- a/private/system_app.te
++++ b/private/system_app.te
+@@ -196,4 +196,4 @@ neverallow system_app shell_data_file:dir { no_w_dir_perms open search read };
+ neverallow system_app shell_data_file:file { open read ioctl lock };
+ 
+ # system_app should be the only domain writing the adaptive haptics prop
+-neverallow { domain -init -system_app } adaptive_haptics_prop:property_service set;
++neverallow { domain -init -system_app -opensync_app } adaptive_haptics_prop:property_service set;
+diff --git a/public/app.te b/public/app.te
+index de3d0cabe..d05d3e6a6 100644
+--- a/public/app.te
++++ b/public/app.te
+@@ -199,6 +199,7 @@ neverallow {
+   appdomain
+   -bluetooth
+   -system_app
++  -opensync_app
+ } { bluetooth_audio_hal_prop bluetooth_a2dp_offload_prop bluetooth_prop exported_bluetooth_prop }:file create_file_perms;
+ 
+ # allow system_app to access Nfc-related system properties.
+diff --git a/public/opensync_app.te b/public/opensync_app.te
+new file mode 100644
+index 000000000..e6442dd1d
+--- /dev/null
++++ b/public/opensync_app.te
+@@ -0,0 +1 @@
++type opensync_app, domain;
+diff --git a/public/te_macros b/public/te_macros
+index 58d04b45d..1e1cc2e71 100644
+--- a/public/te_macros
++++ b/public/te_macros
+@@ -762,6 +762,7 @@ define(`hal_attribute_service', `
+         -shell
+         -system_app
+         -traceur_app
++        -opensync_app
+     } $2:service_manager find;
+   ')
+ ')
+-- 
+2.40.1
+

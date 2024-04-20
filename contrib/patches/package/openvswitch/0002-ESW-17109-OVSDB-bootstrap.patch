@@ -1,0 +1,61 @@
+--- a/ovsdb/ovsdb-server.c
++++ b/ovsdb/ovsdb-server.c
+@@ -283,6 +283,46 @@ main_loop(struct server_config *config,
+     free(remotes_error);
+ }
+ 
++#ifdef __ANDROID__
++static FILE* tmpfile_dir(const char* tmp_dir) {
++  char* path = NULL;
++  if (asprintf(&path, "%s/tmp.XXXXXXXXXX", tmp_dir) == -1) {
++    return NULL;
++  }
++
++  int fd;
++  {
++    fd = mkstemp(path);
++    if (fd == -1) {
++      free(path);
++      return NULL;
++    }
++
++    // Unlink the file now so that it's removed when closed.
++    unlink(path);
++    free(path);
++
++    // Can we still use the file now it's unlinked?
++    // File systems without hard link support won't have the usual Unix semantics.
++    struct stat sb;
++    int rc = fstat(fd, &sb);
++    if (rc == -1) {
++      close(fd);
++      return NULL;
++    }
++  }
++
++  // Turn the file descriptor into a FILE*.
++  FILE* fp = fdopen(fd, "w+");
++  if (fp != NULL) {
++    return fp;
++  }
++
++  close(fd);
++  return NULL;
++}
++#endif
++
+ int
+ main(int argc, char *argv[])
+ {
+@@ -320,7 +360,11 @@ main(int argc, char *argv[])
+      * configuration to it.  When --monitor is used, this preserves the effects
+      * of ovs-appctl commands such as ovsdb-server/add-remote (which saves the
+      * new configuration) across crashes. */
++#ifndef __ANDROID__
+     config_tmpfile = tmpfile();
++#else
++    config_tmpfile = tmpfile_dir(ovs_rundir());
++#endif
+     if (!config_tmpfile) {
+         ovs_fatal(errno, "failed to create temporary file");
+     }

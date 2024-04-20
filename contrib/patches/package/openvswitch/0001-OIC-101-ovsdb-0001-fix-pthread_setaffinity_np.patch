@@ -1,0 +1,25 @@
+From f37887edb4cd10e4a74b328614a092bb78f2e870 Mon Sep 17 00:00:00 2001
+From: Fancy Qian <fqian@plume.com>
+Date: Wed, 30 Aug 2023 16:34:35 +0800
+Subject: [PATCH] OIC-101: ovsdb-0001-fix-pthread_setaffinity_np
+
+Signed-off-by: Fancy Qian <fqian@plume.com>
+---
+ lib/ovs-numa.c              |  2 +-
+ 1 files changed, 1 insertion(+), 1 deletions(-)
+ delete mode 100644 app/opensync-core/patches/ovsdb-0001-fix-pthread_setaffinity_np.patch
+
+diff --git a/lib/ovs-numa.c b/lib/ovs-numa.c
+index 24edeab..8dfa1c0 100644
+--- a/lib/ovs-numa.c
++++ b/lib/ovs-numa.c
+@@ -545,7 +545,7 @@ int ovs_numa_thread_setaffinity_core(unsigned core_id OVS_UNUSED)
+ 
+     CPU_ZERO(&cpuset);
+     CPU_SET(core_id, &cpuset);
+-    err = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
++    err = sched_setaffinity(pthread_gettid_np(pthread_self()), sizeof cpuset, &cpuset);
+     if (err) {
+         VLOG_ERR("Thread affinity error %d",err);
+         return err;
+2.40.1

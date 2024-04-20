@@ -1,0 +1,13 @@
+# All files (and subdirectories) in this directory are ignored.
+#
+# Any packages downloaded to this directory will not cause the
+# repository state to be considered 'dirty' by git.
+#
+# If desired, packages can be committed explicitly using the --force
+# option.
+#
+# Note that if this file itself is modified (or removed), the
+# repository will diverge from the one that it was forked from, and
+# keeping it in sync with newer releases will no longer be trivial.
+
+*

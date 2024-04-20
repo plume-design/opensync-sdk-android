@@ -1,0 +1,148 @@
+From 8f906b0395be71fd4e3d19df5505a4a892338f30 Mon Sep 17 00:00:00 2001
+From: Fancy Qian <fqian@plume.com>
+Date: Mon, 8 Jan 2024 17:01:10 +0800
+Subject: [PATCH 2/2] ESW-17224: sepolicy: add opensync addtional allow security context
+
+* Execution of system APP data file.
+* Unix sock file of system APP data file.
+* perf_event(API level 30 ~ 33 required)
+
+Change-Id: I5676788f53dd7c47eee3e1318af12179d3969cfc
+Signed-off-by: Fancy Qian <fqian@plume.com>
+---
+ prebuilts/api/28.0/private/opensync_app.te |  9 +++++++++
+ prebuilts/api/29.0/private/opensync_app.te |  9 +++++++++
+ prebuilts/api/30.0/private/opensync_app.te | 10 ++++++++++
+ prebuilts/api/31.0/private/opensync_app.te | 10 ++++++++++
+ prebuilts/api/32.0/private/opensync_app.te | 10 ++++++++++
+ prebuilts/api/33.0/private/opensync_app.te | 10 ++++++++++
+ private/opensync_app.te                    | 10 ++++++++++
+ 7 files changed, 68 insertions(+)
+
+diff --git a/prebuilts/api/28.0/private/opensync_app.te b/prebuilts/api/28.0/private/opensync_app.te
+index 64a66654b..279641b11 100644
+--- a/prebuilts/api/28.0/private/opensync_app.te
++++ b/prebuilts/api/28.0/private/opensync_app.te
+@@ -124,3 +124,12 @@ allow opensync_app system_server:udp_socket {
+ 
+ # app domains which access /dev/fuse should not run as opensync_app
+ neverallow opensync_app fuse_device:chr_file *;
++
++###
++### Above are same as system app
++###
++### Below are opensync specific rules
++###
++
++allow opensync_app system_app_data_file:file {execute execute_no_trans};
++allow opensync_app system_app_data_file:sock_file create_file_perms;
+diff --git a/prebuilts/api/29.0/private/opensync_app.te b/prebuilts/api/29.0/private/opensync_app.te
+index 51b5d5ac3..d185cbbd5 100644
+--- a/prebuilts/api/29.0/private/opensync_app.te
++++ b/prebuilts/api/29.0/private/opensync_app.te
+@@ -147,3 +147,12 @@ allow opensync_app system_server:udp_socket {
+ 
+ # app domains which access /dev/fuse should not run as opensync_app
+ neverallow opensync_app fuse_device:chr_file *;
++
++###
++### Above are same as system app
++###
++### Below are opensync specific rules
++###
++
++allow opensync_app system_app_data_file:file {execute execute_no_trans};
++allow opensync_app system_app_data_file:sock_file create_file_perms;
+diff --git a/prebuilts/api/30.0/private/opensync_app.te b/prebuilts/api/30.0/private/opensync_app.te
+index 0f450a130..32fc875ee 100644
+--- a/prebuilts/api/30.0/private/opensync_app.te
++++ b/prebuilts/api/30.0/private/opensync_app.te
+@@ -161,3 +161,13 @@ neverallow opensync_app fuse_device:chr_file *;
+ # bug reports, but not reads.
+ neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
+ neverallow opensync_app shell_data_file:file { open read ioctl lock };
++
++###
++### Above are same as system app
++###
++### Below are opensync specific rules
++###
++
++allow opensync_app system_app_data_file:file {execute execute_no_trans};
++allow opensync_app system_app_data_file:sock_file create_file_perms;
++allow opensync_app self:perf_event  { cpu kernel open read write };
+diff --git a/prebuilts/api/31.0/private/opensync_app.te b/prebuilts/api/31.0/private/opensync_app.te
+index 372fa34d8..c0b76a9c0 100644
+--- a/prebuilts/api/31.0/private/opensync_app.te
++++ b/prebuilts/api/31.0/private/opensync_app.te
+@@ -185,3 +185,13 @@ neverallow opensync_app fuse_device:chr_file *;
+ # bug reports, but not reads.
+ neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
+ neverallow opensync_app shell_data_file:file { open read ioctl lock };
++
++###
++### Above are same as system app
++###
++### Below are opensync specific rules
++###
++
++allow opensync_app system_app_data_file:file {execute execute_no_trans};
++allow opensync_app system_app_data_file:sock_file create_file_perms;
++allow opensync_app self:perf_event  { cpu kernel open read write };
+diff --git a/prebuilts/api/32.0/private/opensync_app.te b/prebuilts/api/32.0/private/opensync_app.te
+index 372fa34d8..c0b76a9c0 100644
+--- a/prebuilts/api/32.0/private/opensync_app.te
++++ b/prebuilts/api/32.0/private/opensync_app.te
+@@ -185,3 +185,13 @@ neverallow opensync_app fuse_device:chr_file *;
+ # bug reports, but not reads.
+ neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
+ neverallow opensync_app shell_data_file:file { open read ioctl lock };
++
++###
++### Above are same as system app
++###
++### Below are opensync specific rules
++###
++
++allow opensync_app system_app_data_file:file {execute execute_no_trans};
++allow opensync_app system_app_data_file:sock_file create_file_perms;
++allow opensync_app self:perf_event  { cpu kernel open read write };
+diff --git a/prebuilts/api/33.0/private/opensync_app.te b/prebuilts/api/33.0/private/opensync_app.te
+index eb16d7952..eebb14d44 100644
+--- a/prebuilts/api/33.0/private/opensync_app.te
++++ b/prebuilts/api/33.0/private/opensync_app.te
+@@ -191,3 +191,13 @@ neverallow opensync_app fuse_device:chr_file *;
+ # bug reports, but not reads.
+ neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
+ neverallow opensync_app shell_data_file:file { open read ioctl lock };
++
++###
++### Above are same as system app
++###
++### Below are opensync specific rules
++###
++
++allow opensync_app system_app_data_file:file {execute execute_no_trans};
++allow opensync_app system_app_data_file:sock_file create_file_perms;
++allow opensync_app self:perf_event  { cpu kernel open read write };
+diff --git a/private/opensync_app.te b/private/opensync_app.te
+index eb16d7952..eebb14d44 100644
+--- a/private/opensync_app.te
++++ b/private/opensync_app.te
+@@ -191,3 +191,13 @@ neverallow opensync_app fuse_device:chr_file *;
+ # bug reports, but not reads.
+ neverallow opensync_app shell_data_file:dir { no_w_dir_perms open search read };
+ neverallow opensync_app shell_data_file:file { open read ioctl lock };
++
++###
++### Above are same as system app
++###
++### Below are opensync specific rules
++###
++
++allow opensync_app system_app_data_file:file {execute execute_no_trans};
++allow opensync_app system_app_data_file:sock_file create_file_perms;
++allow opensync_app self:perf_event  { cpu kernel open read write };
+-- 
+2.40.1
+
